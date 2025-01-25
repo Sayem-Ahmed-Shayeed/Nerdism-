@@ -42,12 +42,6 @@ class _CourseContentState extends State<CourseContent> {
     openBox();
   }
 
-  @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
-  }
-
   Future<void> openBox() async {
     try {
       courseMaterialBox =
@@ -59,6 +53,7 @@ class _CourseContentState extends State<CourseContent> {
         isLoading = false;
       });
     }
+    ;
   }
 
   void showRenameDialog(
@@ -146,24 +141,37 @@ class _CourseContentState extends State<CourseContent> {
     }
   }
 
-  //these are for the timer
+  @override
+  void dispose() {
+    // Check if the timer is not null and active before canceling
+    if (_timer != null && _timer!.isActive) {
+      _timer!.cancel();
+    }
+    elapsedTimeNotifier.dispose(); // Dispose the ValueNotifier
+    super.dispose();
+  }
+
+// Timer-related variables
   ValueNotifier<int> elapsedTimeNotifier = ValueNotifier<int>(3);
-  late Timer _timer;
+  Timer? _timer; // Use nullable Timer
   int timerElapsed = 0;
 
   void _startTimer(BuildContext context) {
-    // Start the timer from 3 seconds and decrease by 1 second every second
+    // Cancel any existing timer before starting a new one
+    _timer?.cancel();
+
+    // Reset the elapsed time to 3
+    elapsedTimeNotifier.value = 3;
+
+    // Start the timer
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (elapsedTimeNotifier.value > 0) {
         elapsedTimeNotifier.value--;
       } else {
-        _timer.cancel();
+        _timer?.cancel();
         ScaffoldMessenger.of(context).clearSnackBars();
       }
     });
-
-    // Reset the elapsed time to 3 when the timer starts
-    elapsedTimeNotifier.value = 3;
   }
 
   void deleteNoteAt(BuildContext context, int index) {
@@ -179,9 +187,11 @@ class _CourseContentState extends State<CourseContent> {
     setState(() {
       courseMaterialBox.deleteAt(index);
     });
+
     // Start the timer when the note is deleted
     ScaffoldMessenger.of(context).clearSnackBars();
     _startTimer(context);
+
     // Show a snackbar with undo functionality
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -211,7 +221,8 @@ class _CourseContentState extends State<CourseContent> {
                   ),
                   onTap: () {
                     // Stop the timer and reset elapsed time
-                    _timer.cancel();
+                    ScaffoldMessenger.of(context).clearSnackBars();
+                    _timer?.cancel();
                     elapsedTimeNotifier.value = 3; // Reset elapsed time
 
                     // Restore the deleted note
@@ -221,7 +232,6 @@ class _CourseContentState extends State<CourseContent> {
                     courseMaterialBox.add(tempList[tempList.length - 1]);
 
                     setState(() {}); // Refresh the UI
-                    ScaffoldMessenger.of(context).clearSnackBars();
                   },
                 ),
               ],
