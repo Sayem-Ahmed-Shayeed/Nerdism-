@@ -7,13 +7,16 @@ const uuid = Uuid();
 
 @HiveType(typeId: 1)
 class UserInfo {
-  UserInfo({required this.name, required this.semester});
+  UserInfo({
+    required this.name,
+    required this.batch,
+  });
 
   @HiveField(0)
   String name;
 
   @HiveField(1)
-  int semester;
+  int batch;
 
   @HiveField(2)
   String id = uuid.v4();

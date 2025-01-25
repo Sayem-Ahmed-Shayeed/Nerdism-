@@ -18,7 +18,7 @@ class UserInfoAdapter extends TypeAdapter<UserInfo> {
     };
     return UserInfo(
       name: fields[0] as String,
-      semester: fields[1] as int,
+      batch: fields[1] as int,
     )..id = fields[2] as String;
   }
 
@@ -29,7 +29,7 @@ class UserInfoAdapter extends TypeAdapter<UserInfo> {
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
-      ..write(obj.semester)
+      ..write(obj.batch)
       ..writeByte(2)
       ..write(obj.id);
   }

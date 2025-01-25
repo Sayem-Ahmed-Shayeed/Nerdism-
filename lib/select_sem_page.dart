@@ -27,13 +27,13 @@ class _FirstPageState extends State<FirstPage> {
 
   String suffixText = "";
   String name = '';
-  int semester = -1;
+  int batch = -1;
   UserInfo? enteredInfo;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   void submit() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      enteredInfo = UserInfo(name: name, semester: semester);
+      enteredInfo = UserInfo(name: name, batch: batch);
       userInfoBox.put(enteredInfo!.id, enteredInfo!);
       setState(() {});
     }
@@ -83,41 +83,44 @@ class _FirstPageState extends State<FirstPage> {
                           SizedBox(
                             width: MediaQuery.of(context).size.width / 2 - 20,
                             child: TextFormField(
-                              maxLength: 1,
+                              maxLength: 2,
                               decoration: InputDecoration(
                                 border: const OutlineInputBorder(
                                   borderRadius: BorderRadius.all(
                                     Radius.circular(10),
                                   ),
                                 ),
-                                labelText: "Which semester are you in?",
+                                labelText: "Which batch are you in?",
                                 suffixText: suffixText,
                               ),
                               validator: (value) {
                                 if (value == null ||
                                     value.isEmpty ||
-                                    int.parse(value) <= 0 ||
-                                    int.parse(value) > 8) {
-                                  return "Semester should be between 1 to 8.";
+                                    int.parse(value) <= 40 ||
+                                    int.parse(value) > 65) {
+                                  return "Please enter a valid batch(41-65)";
                                 }
                                 return null;
                               },
                               onSaved: (newValue) {
-                                semester = int.parse(newValue!);
+                                batch = int.parse(newValue!);
                               },
                               onChanged: (val) {
                                 int value = int.parse(val);
-                                if (value == 1) {
+                                if (value == 41 || value == 51 || value == 61) {
                                   suffixText = 'st';
-                                } else if (value == 2) {
+                                } else if (value == 42 ||
+                                    value == 52 ||
+                                    value == 62) {
                                   suffixText = 'nd';
-                                } else if (value == 3) {
+                                } else if (value == 43 ||
+                                    value == 53 ||
+                                    value == 63) {
                                   suffixText = 'rd';
-                                } else if (value == 4) {
-                                  suffixText = 'th';
                                 } else {
                                   suffixText = 'th';
                                 }
+
                                 setState(() {});
                               },
                             ),
@@ -135,7 +138,7 @@ class _FirstPageState extends State<FirstPage> {
                                   setState(
                                     () {
                                       name = "";
-                                      semester = -1;
+                                      batch = -1;
                                     },
                                   );
                                 },
