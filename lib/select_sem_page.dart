@@ -81,7 +81,9 @@ class _FirstPageState extends State<FirstPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           SizedBox(
-                            width: MediaQuery.of(context).size.width / 2 - 20,
+                            width:
+                                (MediaQuery.of(context).size.width - 60) / 2 -
+                                    10,
                             child: TextFormField(
                               maxLength: 2,
                               decoration: InputDecoration(

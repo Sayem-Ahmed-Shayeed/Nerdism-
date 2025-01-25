@@ -10,7 +10,7 @@ class CourseContentDetails {
   CourseContentDetails({
     required this.path,
     required this.type,
-    required this.shortNote,
+    required this.renamedName,
   });
 
   @HiveField(0)
@@ -23,5 +23,5 @@ class CourseContentDetails {
   String type;
 
   @HiveField(3)
-  String shortNote;
+  String renamedName;
 }

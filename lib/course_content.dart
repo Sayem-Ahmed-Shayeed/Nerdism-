@@ -6,11 +6,16 @@ import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:nerdism/course_content_adapter.dart';
 import 'package:nerdism/nerdism.dart';
+import 'package:open_file/open_file.dart';
 import 'package:path/path.dart';
 
 var formattedDate = DateFormat.yMMMMd('en_US');
 
 class CourseContent extends StatefulWidget {
+  void openFile(file) async {
+    await OpenFile.open(file);
+  }
+
   CourseContent({
     super.key,
     required this.courseTitle,
@@ -28,6 +33,7 @@ class _CourseContentState extends State<CourseContent> {
   late Box<CourseContentDetails> courseMaterialBox;
   bool isLoading = true;
   bool isAddingData = false;
+  String renamedName = '';
 
   @override
   void initState() {
@@ -45,6 +51,91 @@ class _CourseContentState extends State<CourseContent> {
       setState(() {
         isLoading = false;
       });
+    }
+  }
+
+  void showRenameDialog(
+      BuildContext context, int index, CourseContentDetails content) {
+    final _formKey = GlobalKey<FormState>();
+    final TextEditingController _renameController = TextEditingController();
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          // backgroundColor: Colors.black,
+          shape: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          title: const Text("Rename File"),
+          content: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: _renameController,
+                  decoration: InputDecoration(
+                    labelText: "New Name",
+                    hintText: "Enter new name",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return "Name cannot be empty";
+                    }
+                    return null;
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  String newName = _renameController.text.trim();
+                  rename(index, content.path, content.type, newName);
+                  Navigator.pop(context);
+                }
+              },
+              child: const Text("Rename"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void rename(
+    int index,
+    String path,
+    String type,
+    String renamedName,
+  ) {
+    final key = courseMaterialBox.keyAt(index); // Retrieve the correct key
+    if (key != null) {
+      setState(() {
+        courseMaterialBox.put(
+          key,
+          CourseContentDetails(
+            path: path,
+            type: type,
+            renamedName: renamedName,
+          ),
+        );
+      });
+    } else {
+      print("Error: Key not found for index $index");
     }
   }
 
@@ -78,7 +169,7 @@ class _CourseContentState extends State<CourseContent> {
           CourseContentDetails(
             path: files[i].path,
             type: extension(files[i].path),
-            shortNote: "",
+            renamedName: "",
           ),
         );
       }
@@ -116,7 +207,7 @@ class _CourseContentState extends State<CourseContent> {
           CourseContentDetails(
             path: files[i].path,
             type: extension(files[i].path),
-            shortNote: "",
+            renamedName: "",
           ),
         );
       }
@@ -180,6 +271,7 @@ class _CourseContentState extends State<CourseContent> {
                             'Nura Apur Note',
                             style: TextStyle(
                               color: textColor,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
@@ -194,9 +286,10 @@ class _CourseContentState extends State<CourseContent> {
                         ),
                         child: Center(
                           child: Text(
-                            'Previous Years Questions',
+                            'Question Bank',
                             style: TextStyle(
                               color: textColor,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
@@ -221,7 +314,7 @@ class _CourseContentState extends State<CourseContent> {
                         : courseMaterialBox.isEmpty
                             ? Center(
                                 child: Text(
-                                  "No course material is here.",
+                                  "No course material is here...",
                                   style: TextStyle(
                                     fontSize: 16,
                                     color: textColor,
@@ -239,7 +332,7 @@ class _CourseContentState extends State<CourseContent> {
                                     children: [
                                       GestureDetector(
                                         onTap: () {
-                                          // Open the file using open_file package
+                                          widget.openFile(content!.path);
                                         },
                                         child: Container(
                                           width: double.infinity,
@@ -251,7 +344,11 @@ class _CourseContentState extends State<CourseContent> {
                                           ),
                                           child: ListTile(
                                             title: Text(
-                                              content?.type ?? "Unknown",
+                                              content != null &&
+                                                      content.renamedName
+                                                          .isNotEmpty
+                                                  ? "${content.renamedName} ${content.type}"
+                                                  : basename(content!.path),
                                               style: TextStyle(
                                                 fontSize: 14,
                                                 color: textColor,
@@ -273,6 +370,16 @@ class _CourseContentState extends State<CourseContent> {
                                                 fontWeight: FontWeight.bold,
                                                 color: textColor,
                                               ),
+                                            ),
+                                            trailing: IconButton(
+                                              onPressed: () {
+                                                showRenameDialog(
+                                                    context, index, content!);
+                                              },
+                                              icon: const Icon(
+                                                Icons.create_outlined,
+                                              ),
+                                              color: textColor,
                                             ),
                                           ),
                                         ),
