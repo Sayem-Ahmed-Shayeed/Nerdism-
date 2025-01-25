@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -41,12 +42,18 @@ class _CourseContentState extends State<CourseContent> {
     openBox();
   }
 
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
   Future<void> openBox() async {
     try {
       courseMaterialBox =
           await Hive.openBox<CourseContentDetails>(widget.courseCode);
     } catch (e) {
-      print("Error opening Hive box: $e");
+      //...
     } finally {
       setState(() {
         isLoading = false;
@@ -56,8 +63,8 @@ class _CourseContentState extends State<CourseContent> {
 
   void showRenameDialog(
       BuildContext context, int index, CourseContentDetails content) {
-    final _formKey = GlobalKey<FormState>();
-    final TextEditingController _renameController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    final TextEditingController renameController = TextEditingController();
 
     showDialog(
       context: context,
@@ -70,12 +77,12 @@ class _CourseContentState extends State<CourseContent> {
           ),
           title: const Text("Rename File"),
           content: Form(
-            key: _formKey,
+            key: formKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextFormField(
-                  controller: _renameController,
+                  controller: renameController,
                   decoration: InputDecoration(
                     labelText: "New Name",
                     hintText: "Enter new name",
@@ -102,8 +109,8 @@ class _CourseContentState extends State<CourseContent> {
             ),
             ElevatedButton(
               onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  String newName = _renameController.text.trim();
+                if (formKey.currentState!.validate()) {
+                  String newName = renameController.text.trim();
                   rename(index, content.path, content.type, newName);
                   Navigator.pop(context);
                 }
@@ -135,8 +142,94 @@ class _CourseContentState extends State<CourseContent> {
         );
       });
     } else {
-      print("Error: Key not found for index $index");
+      //....
     }
+  }
+
+  //these are for the timer
+  ValueNotifier<int> elapsedTimeNotifier = ValueNotifier<int>(3);
+  late Timer _timer;
+  int timerElapsed = 0;
+
+  void _startTimer(BuildContext context) {
+    // Start the timer from 3 seconds and decrease by 1 second every second
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (elapsedTimeNotifier.value > 0) {
+        elapsedTimeNotifier.value--;
+      } else {
+        _timer.cancel();
+        ScaffoldMessenger.of(context).clearSnackBars();
+      }
+    });
+
+    // Reset the elapsed time to 3 when the timer starts
+    elapsedTimeNotifier.value = 3;
+  }
+
+  void deleteNoteAt(BuildContext context, int index) {
+    CourseContentDetails? temp = courseMaterialBox.getAt(index);
+
+    // Store all current notes in a temporary list
+    List<CourseContentDetails> tempList = [];
+    for (int i = 0; i < courseMaterialBox.length; i++) {
+      tempList.add(courseMaterialBox.getAt(i)!);
+    }
+
+    // Remove the note from the box
+    setState(() {
+      courseMaterialBox.deleteAt(index);
+    });
+    // Start the timer when the note is deleted
+    ScaffoldMessenger.of(context).clearSnackBars();
+    _startTimer(context);
+    // Show a snackbar with undo functionality
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        duration: const Duration(seconds: 3),
+        behavior: SnackBarBehavior.floating,
+        content: ValueListenableBuilder<int>(
+          valueListenable: elapsedTimeNotifier,
+          builder: (context, elapsedTime, child) {
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "Item removed.",
+                  style: TextStyle(
+                    fontFamily: 'Stylish',
+                    color: Colors.red,
+                  ),
+                ),
+                InkWell(
+                  borderRadius: BorderRadius.circular(5),
+                  child: Text(
+                    "Undo(${elapsedTime}s)", // Update elapsed time
+                    style: const TextStyle(
+                      fontFamily: 'Stylish',
+                      color: Colors.green,
+                    ),
+                  ),
+                  onTap: () {
+                    // Stop the timer and reset elapsed time
+                    _timer.cancel();
+                    elapsedTimeNotifier.value = 3; // Reset elapsed time
+
+                    // Restore the deleted note
+                    for (int i = 0; i < tempList.length - 1; i++) {
+                      courseMaterialBox.putAt(i, tempList[i]);
+                    }
+                    courseMaterialBox.add(tempList[tempList.length - 1]);
+
+                    setState(() {}); // Refresh the UI
+                    ScaffoldMessenger.of(context).clearSnackBars();
+                  },
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
   }
 
   Future<void> addImages() async {
@@ -164,8 +257,7 @@ class _CourseContentState extends State<CourseContent> {
       });
 
       for (int i = 0; i < files.length; i++) {
-        courseMaterialBox.put(
-          '${courseMaterialBox.length + i}',
+        courseMaterialBox.add(
           CourseContentDetails(
             path: files[i].path,
             type: extension(files[i].path),
@@ -202,8 +294,7 @@ class _CourseContentState extends State<CourseContent> {
       });
 
       for (int i = 0; i < files.length; i++) {
-        courseMaterialBox.put(
-          '${courseMaterialBox.length + i}',
+        courseMaterialBox.add(
           CourseContentDetails(
             path: files[i].path,
             type: extension(files[i].path),
@@ -328,64 +419,79 @@ class _CourseContentState extends State<CourseContent> {
                                 itemBuilder: (context, index) {
                                   final content =
                                       courseMaterialBox.getAt(index);
-                                  return Column(
-                                    children: [
-                                      GestureDetector(
-                                        onTap: () {
-                                          widget.openFile(content!.path);
-                                        },
-                                        child: Container(
-                                          width: double.infinity,
-                                          padding: const EdgeInsets.all(10),
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(20),
-                                            color: Colors.black,
-                                          ),
-                                          child: ListTile(
-                                            title: Text(
-                                              content != null &&
-                                                      content.renamedName
-                                                          .isNotEmpty
-                                                  ? "${content.renamedName} ${content.type}"
-                                                  : basename(content!.path),
-                                              style: TextStyle(
-                                                fontSize: 14,
+                                  return Dismissible(
+                                    onDismissed: (direction) {
+                                      deleteNoteAt(context, index);
+                                    },
+                                    key: ValueKey(content.hashCode),
+                                    background: Padding(
+                                      padding: const EdgeInsets.all(15.0),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(20),
+                                        child: Image.asset(
+                                          "assets/a.gif",
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () {
+                                            widget.openFile(content.path);
+                                          },
+                                          child: Container(
+                                            width: double.infinity,
+                                            padding: const EdgeInsets.all(10),
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              color: Colors.black,
+                                            ),
+                                            child: ListTile(
+                                              title: Text(
+                                                content != null &&
+                                                        content.renamedName
+                                                            .isNotEmpty
+                                                    ? "${content.renamedName} ${content.type}"
+                                                    : basename(content!.path),
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  color: textColor,
+                                                ),
+                                              ),
+                                              subtitle: Text(
+                                                formattedDate
+                                                    .format(content.date),
+                                                style: TextStyle(
+                                                  fontSize: 10,
+                                                  color: textColor,
+                                                ),
+                                              ),
+                                              leading: Text(
+                                                "${index + 1}",
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: textColor,
+                                                ),
+                                              ),
+                                              trailing: IconButton(
+                                                onPressed: () {
+                                                  showRenameDialog(
+                                                      context, index, content);
+                                                },
+                                                icon: const Icon(
+                                                  Icons.create_outlined,
+                                                  size: 15,
+                                                ),
                                                 color: textColor,
                                               ),
-                                            ),
-                                            subtitle: Text(
-                                              content != null
-                                                  ? formattedDate
-                                                      .format(content.date)
-                                                  : "No Date",
-                                              style: TextStyle(
-                                                fontSize: 10,
-                                                color: textColor,
-                                              ),
-                                            ),
-                                            leading: Text(
-                                              "${index + 1}",
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                color: textColor,
-                                              ),
-                                            ),
-                                            trailing: IconButton(
-                                              onPressed: () {
-                                                showRenameDialog(
-                                                    context, index, content!);
-                                              },
-                                              icon: const Icon(
-                                                Icons.create_outlined,
-                                              ),
-                                              color: textColor,
                                             ),
                                           ),
                                         ),
-                                      ),
-                                      const SizedBox(height: 10),
-                                    ],
+                                        const SizedBox(height: 10),
+                                      ],
+                                    ),
                                   );
                                 },
                               ),

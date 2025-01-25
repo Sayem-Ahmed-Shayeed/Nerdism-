@@ -13,16 +13,19 @@ class FirstPage extends StatefulWidget {
 
 class _FirstPageState extends State<FirstPage> {
   late Box<UserInfo> userInfoBox;
+  bool isLoading = true;
 
   @override
   void initState() {
-    openBox();
     super.initState();
+    openBox();
   }
 
   Future<void> openBox() async {
     userInfoBox = await Hive.openBox<UserInfo>('UserBox');
-    setState(() {});
+    setState(() {
+      isLoading = false; // Mark initialization as complete
+    });
   }
 
   String suffixText = "";
@@ -30,18 +33,28 @@ class _FirstPageState extends State<FirstPage> {
   int batch = -1;
   UserInfo? enteredInfo;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   void submit() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       enteredInfo = UserInfo(name: name, batch: batch);
       userInfoBox.put(enteredInfo!.id, enteredInfo!);
-      setState(() {});
+      setState(() {}); // Refresh the widget to reflect new data
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return (userInfoBox.length > 0)
+    if (isLoading) {
+      // Show a loading indicator while waiting for the box to initialize
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    return (userInfoBox.isNotEmpty)
         ? const Nerdism()
         : Scaffold(
             body: Center(
@@ -123,13 +136,11 @@ class _FirstPageState extends State<FirstPage> {
                                   suffixText = 'th';
                                 }
 
-                                setState(() {});
+                                setState(
+                                    () {}); // Refresh the widget to show suffix
                               },
                             ),
                           ),
-                          // const SizedBox(
-                          //   width: 10,
-                          // ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
