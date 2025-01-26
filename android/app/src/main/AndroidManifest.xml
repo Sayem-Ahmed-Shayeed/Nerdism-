@@ -2,7 +2,7 @@
     <application
         android:label="nerdism"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/nerdappicon">
         <activity
             android:name=".MainActivity"
             android:exported="true"

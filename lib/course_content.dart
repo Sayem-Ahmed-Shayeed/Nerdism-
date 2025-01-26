@@ -5,8 +5,9 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
+import 'package:lottie/lottie.dart';
 import 'package:nerdism/course_content_adapter.dart';
-import 'package:nerdism/nerdism.dart';
+import 'package:nerdism/theme&colors/colors.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path/path.dart';
 
@@ -53,7 +54,6 @@ class _CourseContentState extends State<CourseContent> {
         isLoading = false;
       });
     }
-    ;
   }
 
   void showRenameDialog(
@@ -70,21 +70,46 @@ class _CourseContentState extends State<CourseContent> {
           shape: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
           ),
-          title: const Text("Rename File"),
+          title: Text(
+            "Rename File",
+            style: TextStyle(
+              fontSize: 14,
+              color: textColor2,
+              fontFamily: 'font6',
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           content: Form(
             key: formKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextFormField(
-                  controller: renameController,
+                  style: const TextStyle(
+                    fontFamily: 'font6',
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
                   decoration: InputDecoration(
                     labelText: "New Name",
+                    labelStyle: TextStyle(
+                      fontSize: 12,
+                      fontFamily: 'font6',
+                      color: textColor2,
+                      fontWeight: FontWeight.bold,
+                    ),
                     hintText: "Enter new name",
+                    hintStyle: TextStyle(
+                      color: textColor2,
+                      fontSize: 12,
+                      fontFamily: 'font6',
+                      fontWeight: FontWeight.bold,
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
+                  controller: renameController,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return "Name cannot be empty";
@@ -100,7 +125,15 @@ class _CourseContentState extends State<CourseContent> {
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: const Text("Cancel"),
+              child: Text(
+                "Cancel",
+                style: TextStyle(
+                  fontSize: 12,
+                  color: textColor2,
+                  fontFamily: 'font6',
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
             ElevatedButton(
               onPressed: () {
@@ -110,7 +143,15 @@ class _CourseContentState extends State<CourseContent> {
                   Navigator.pop(context);
                 }
               },
-              child: const Text("Rename"),
+              child: Text(
+                "Rename",
+                style: TextStyle(
+                  fontSize: 12,
+                  color: textColor,
+                  fontFamily: 'font6',
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ],
         );
@@ -175,8 +216,6 @@ class _CourseContentState extends State<CourseContent> {
   }
 
   void deleteNoteAt(BuildContext context, int index) {
-    CourseContentDetails? temp = courseMaterialBox.getAt(index);
-
     // Store all current notes in a temporary list
     List<CourseContentDetails> tempList = [];
     for (int i = 0; i < courseMaterialBox.length; i++) {
@@ -195,6 +234,7 @@ class _CourseContentState extends State<CourseContent> {
     // Show a snackbar with undo functionality
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
+        backgroundColor: const Color(0xff423838),
         duration: const Duration(seconds: 3),
         behavior: SnackBarBehavior.floating,
         content: ValueListenableBuilder<int>(
@@ -206,8 +246,10 @@ class _CourseContentState extends State<CourseContent> {
                 const Text(
                   "Item removed.",
                   style: TextStyle(
-                    fontFamily: 'Stylish',
+                    fontFamily: 'font6',
                     color: Colors.red,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 InkWell(
@@ -215,8 +257,10 @@ class _CourseContentState extends State<CourseContent> {
                   child: Text(
                     "Undo(${elapsedTime}s)", // Update elapsed time
                     style: const TextStyle(
-                      fontFamily: 'Stylish',
+                      fontFamily: 'font6',
+                      fontSize: 12,
                       color: Colors.green,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                   onTap: () {
@@ -322,6 +366,7 @@ class _CourseContentState extends State<CourseContent> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: appBarColor,
       floatingActionButton: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
@@ -329,28 +374,42 @@ class _CourseContentState extends State<CourseContent> {
             width: 35,
             child: IconButton(
               onPressed: isAddingData ? null : addPdfs,
-              icon: const Icon(
+              icon: Icon(
                 Icons.picture_as_pdf,
                 size: 20,
+                color: textColor,
               ),
             ),
           ),
           IconButton(
             onPressed: isAddingData ? null : addImages,
-            icon: const Icon(
+            icon: Icon(
               Icons.add_a_photo_sharp,
               size: 20,
+              color: textColor,
             ),
           )
         ],
       ),
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         backgroundColor: appBarColor,
-        title: Text(widget.courseCode),
+        title: Text(
+          widget.courseTitle,
+          style: TextStyle(
+            color: textColor2,
+            fontFamily: 'font6',
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
+        ),
       ),
       body: isLoading
-          ? const Center(
-              child: CircularProgressIndicator(),
+          ? Center(
+              child: LottieBuilder.asset(
+                'assets/Lottie/loader.json',
+                fit: BoxFit.cover,
+              ),
             )
           : Padding(
               padding: const EdgeInsets.all(20.0),
@@ -365,13 +424,14 @@ class _CourseContentState extends State<CourseContent> {
                         width: (MediaQuery.of(context).size.width - 50) / 2,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
-                          color: Colors.black,
+                          color: containerColor,
                         ),
                         child: Center(
                           child: Text(
                             'Nura Apur Note',
                             style: TextStyle(
-                              color: textColor,
+                              color: textColor2,
+                              fontFamily: 'font6',
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -382,14 +442,15 @@ class _CourseContentState extends State<CourseContent> {
                         height: 80,
                         width: (MediaQuery.of(context).size.width - 50) / 2,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: Colors.black,
+                          borderRadius: BorderRadius.circular(15),
+                          color: containerColor,
                         ),
                         child: Center(
                           child: Text(
                             'Question Bank',
                             style: TextStyle(
-                              color: textColor,
+                              fontFamily: 'font6',
+                              color: textColor2,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -398,12 +459,9 @@ class _CourseContentState extends State<CourseContent> {
                     ],
                   ),
                   const SizedBox(
-                    height: 20,
+                    height: 10,
                   ),
-                  Divider(
-                    thickness: 2,
-                    color: textColor,
-                  ),
+                  const Divider(),
                   const SizedBox(
                     height: 10,
                   ),
@@ -413,14 +471,29 @@ class _CourseContentState extends State<CourseContent> {
                             child: CircularProgressIndicator(),
                           )
                         : courseMaterialBox.isEmpty
-                            ? Center(
-                                child: Text(
-                                  "No course material is here...",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: textColor,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                            ? const Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      "No course material is here.",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontFamily: 'font6',
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Text(
+                                      "Try adding some...",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontFamily: 'font6',
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               )
                             : ListView.builder(
@@ -456,7 +529,7 @@ class _CourseContentState extends State<CourseContent> {
                                             decoration: BoxDecoration(
                                               borderRadius:
                                                   BorderRadius.circular(20),
-                                              color: Colors.black,
+                                              color: containerColor,
                                             ),
                                             child: ListTile(
                                               title: Text(
@@ -467,23 +540,25 @@ class _CourseContentState extends State<CourseContent> {
                                                     : basename(content!.path),
                                                 style: TextStyle(
                                                   fontSize: 14,
-                                                  color: textColor,
+                                                  color: textColor2,
+                                                  fontFamily: 'font6',
+                                                  fontWeight: FontWeight.bold,
                                                 ),
                                               ),
                                               subtitle: Text(
-                                                formattedDate
-                                                    .format(content.date),
+                                                "${formattedDate.format(content.date)} , ${content.date.hour}:${content.date.minute}",
                                                 style: TextStyle(
-                                                  fontSize: 10,
-                                                  color: textColor,
-                                                ),
+                                                    fontSize: 10,
+                                                    color: textColor2,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontFamily: 'font6'),
                                               ),
                                               leading: Text(
                                                 "${index + 1}",
                                                 style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  color: textColor,
-                                                ),
+                                                    fontWeight: FontWeight.bold,
+                                                    color: textColor2,
+                                                    fontFamily: 'font6'),
                                               ),
                                               trailing: IconButton(
                                                 onPressed: () {
@@ -493,6 +568,7 @@ class _CourseContentState extends State<CourseContent> {
                                                 icon: const Icon(
                                                   Icons.create_outlined,
                                                   size: 15,
+                                                  color: Colors.white,
                                                 ),
                                                 color: textColor,
                                               ),

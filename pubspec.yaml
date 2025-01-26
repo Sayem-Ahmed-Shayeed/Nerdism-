@@ -42,6 +42,8 @@ dependencies:
   open_file: ^3.5.10
   intl: ^0.20.2
   path: ^1.9.0
+  animated_splash_screen: ^1.3.0
+  lottie: ^3.1.3
 
 dev_dependencies:
   flutter_test:
@@ -71,6 +73,9 @@ flutter:
   assets:
     - assets/dismissable_background.jpg
     - assets/a.gif
+    - assets/Lottie/splashscreen.json
+    - assets/Lottie/loader.json
+    - assets/Lottie/splashscreen.gif
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -84,17 +89,26 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
-  #   - family: Trajan Pro
-  #     fonts:
-  #       - asset: fonts/TrajanPro.ttf
-  #       - asset: fonts/TrajanPro_Bold.ttf
-  #         weight: 700
+  fonts:
+    - family: font1
+      fonts:
+        - asset: assets/fonts/AkayaKanadaka-Regular.ttf
+
+    - family: font2
+      fonts:
+        - asset: assets/fonts/Boogaloo-Regular.ttf
+
+    - family: font3
+      fonts:
+        - asset: assets/fonts/Devonshire-Regular.ttf
+    - family: font4
+      fonts:
+        - asset: assets/fonts/SmoochSans-VariableFont_wght.ttf
+
+    - family: font6
+      fonts:
+        - asset: assets/fonts/Lato-ThinItalic.ttf
+
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package

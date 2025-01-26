@@ -2,16 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:nerdism/course_content.dart';
 import 'package:nerdism/nerdism.dart';
+import 'package:nerdism/retake_data.dart';
 import 'package:nerdism/select_sem_page.dart';
+import 'package:nerdism/splash_screen.dart';
 import 'course_content_adapter.dart';
 import 'data_model.dart';
 
-var kColorScheme = const Color(0xff213555);
+var kColorScheme = Colors.white;
 void main() async {
   await Hive.initFlutter();
   //registering hive adapters
   Hive.registerAdapter(UserInfoAdapter());
   Hive.registerAdapter(CourseContentDetailsAdapter());
+  Hive.registerAdapter(RetakeCoursesAdapter());
+
   // this box is only used for storing the userName and batches.
   var userInfoBox = await Hive.openBox<UserInfo>('UserBox');
   //all the boxes for the courseContentDetails
@@ -64,6 +68,7 @@ void main() async {
   var cse4233Box = await Hive.openBox<CourseContentDetails>('CSE-4233');
   var cse4234Box = await Hive.openBox<CourseContentDetails>('CSE-4234');
   var cse4801Box = await Hive.openBox<CourseContentDetails>('CSE-4801');
+  var retakeCourseBox = await Hive.openBox<RetakeCourses>('retakeCourse');
 
   runApp(const NerdApp());
 }
@@ -82,7 +87,7 @@ class NerdApp extends StatelessWidget {
         ),
       ),
       debugShowCheckedModeBanner: false,
-      home: const FirstPage(),
+      home: const SplashScreen(),
     );
   }
 }
