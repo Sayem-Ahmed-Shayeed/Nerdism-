@@ -5,8 +5,9 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
-import 'package:lottie/lottie.dart';
 import 'package:nerdism/course_content_adapter.dart';
+import 'nura_apur_note.dart';
+import 'package:nerdism/question_bank_page.dart';
 import 'package:nerdism/theme&colors/colors.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path/path.dart';
@@ -397,20 +398,13 @@ class _CourseContentState extends State<CourseContent> {
         title: Text(
           widget.courseTitle,
           style: TextStyle(
-            color: textColor2,
-            fontFamily: 'font6',
-            fontWeight: FontWeight.bold,
-            fontSize: 14,
+            color: textColor,
+            fontFamily: 'font2',
           ),
         ),
       ),
       body: isLoading
-          ? Center(
-              child: LottieBuilder.asset(
-                'assets/Lottie/loader.json',
-                fit: BoxFit.cover,
-              ),
-            )
+          ? const Center(child: CircularProgressIndicator())
           : Padding(
               padding: const EdgeInsets.all(20.0),
               child: Column(
@@ -419,39 +413,60 @@ class _CourseContentState extends State<CourseContent> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Container(
-                        height: 80,
-                        width: (MediaQuery.of(context).size.width - 50) / 2,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: containerColor,
-                        ),
-                        child: Center(
-                          child: Text(
-                            'Nura Apur Note',
-                            style: TextStyle(
-                              color: textColor2,
-                              fontFamily: 'font6',
-                              fontWeight: FontWeight.bold,
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return NuraApurNote(title: "Nura Apur Note");
+                              },
+                            ),
+                          );
+                        },
+                        child: Container(
+                          height: 80,
+                          width: (MediaQuery.of(context).size.width - 50) / 2,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: containerColor,
+                          ),
+                          child: Center(
+                            child: Text(
+                              'Nura Apur Note',
+                              style: TextStyle(
+                                color: textColor2,
+                                fontFamily: 'font6',
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
                       ),
                       const SizedBox(width: 10),
-                      Container(
-                        height: 80,
-                        width: (MediaQuery.of(context).size.width - 50) / 2,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          color: containerColor,
-                        ),
-                        child: Center(
-                          child: Text(
-                            'Question Bank',
-                            style: TextStyle(
-                              fontFamily: 'font6',
-                              color: textColor2,
-                              fontWeight: FontWeight.bold,
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(context, MaterialPageRoute(
+                            builder: (context) {
+                              return const QuestionBankPage();
+                            },
+                          ));
+                        },
+                        child: Container(
+                          height: 80,
+                          width: (MediaQuery.of(context).size.width - 50) / 2,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: containerColor,
+                          ),
+                          child: Center(
+                            child: Text(
+                              'Question Bank',
+                              style: TextStyle(
+                                fontFamily: 'font6',
+                                color: textColor2,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
