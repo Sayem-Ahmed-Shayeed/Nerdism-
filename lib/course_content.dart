@@ -5,9 +5,10 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
+import 'package:lottie/lottie.dart';
 import 'package:nerdism/course_content_adapter.dart';
-import 'nura_apur_note.dart';
-import 'package:nerdism/question_bank_page.dart';
+import 'package:nerdism/link.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:nerdism/theme&colors/colors.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path/path.dart';
@@ -15,10 +16,6 @@ import 'package:path/path.dart';
 var formattedDate = DateFormat.yMMMMd('en_US');
 
 class CourseContent extends StatefulWidget {
-  void openFile(file) async {
-    await OpenFile.open(file);
-  }
-
   CourseContent({
     super.key,
     required this.courseTitle,
@@ -37,11 +34,16 @@ class _CourseContentState extends State<CourseContent> {
   bool isLoading = true;
   bool isAddingData = false;
   String renamedName = '';
+  void isAdding = false;
 
   @override
   void initState() {
     super.initState();
     openBox();
+  }
+
+  void openFile(file) async {
+    await OpenFile.open(file);
   }
 
   Future<void> openBox() async {
@@ -180,6 +182,12 @@ class _CourseContentState extends State<CourseContent> {
       });
     } else {
       //....
+    }
+  }
+
+  Future<void> _openInChrome(Uri url) async {
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      throw 'Could not launch $url';
     }
   }
 
@@ -366,240 +374,314 @@ class _CourseContentState extends State<CourseContent> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: appBarColor,
-      floatingActionButton: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          SizedBox(
-            width: 35,
-            child: IconButton(
-              onPressed: isAddingData ? null : addPdfs,
-              icon: Icon(
-                Icons.picture_as_pdf,
-                size: 20,
-                color: textColor,
-              ),
-            ),
-          ),
-          IconButton(
-            onPressed: isAddingData ? null : addImages,
-            icon: Icon(
-              Icons.add_a_photo_sharp,
-              size: 20,
-              color: textColor,
+    return (isAddingData)
+        ? Center(
+            child: LottieBuilder.asset(
+              'assets/Lottie/loader.json',
+              height: 30,
+              width: 30,
             ),
           )
-        ],
-      ),
-      appBar: AppBar(
-        scrolledUnderElevation: 0,
-        backgroundColor: appBarColor,
-        title: Text(
-          widget.courseTitle,
-          style: TextStyle(
-            color: textColor,
-            fontFamily: 'font2',
-          ),
-        ),
-      ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) {
-                                return NuraApurNote(title: "Nura Apur Note");
+        : Scaffold(
+            backgroundColor: appBarColor,
+            floatingActionButton: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                SizedBox(
+                  width: 35,
+                  child: IconButton(
+                    onPressed: isAddingData ? null : addPdfs,
+                    icon: Icon(
+                      Icons.picture_as_pdf,
+                      size: 20,
+                      color: textColor,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: isAddingData ? null : addImages,
+                  icon: Icon(
+                    Icons.add_a_photo_sharp,
+                    size: 20,
+                    color: textColor,
+                  ),
+                )
+              ],
+            ),
+            appBar: AppBar(
+              scrolledUnderElevation: 0,
+              backgroundColor: appBarColor,
+              title: Text(
+                widget.courseTitle,
+                style: TextStyle(
+                  color: textColor2,
+                  fontFamily: 'font2',
+                  fontWeight: FontWeight.w200,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+            body: isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            "This will lead to an external browser...",
+                                            style: TextStyle(
+                                              color: textColor2,
+                                              fontFamily: 'font6',
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                          const SizedBox(
+                                              height: 10), // Spacer replacement
+                                          Text(
+                                            "Do you want to proceed?",
+                                            style: TextStyle(
+                                              color: textColor2,
+                                              fontFamily: 'font6',
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                          const SizedBox(
+                                              height:
+                                                  20), // Added space between the texts and buttons
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment
+                                                .center, // Centering the buttons
+                                            children: [
+                                              // Space between the buttons
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                },
+                                                child: Text(
+                                                  "No",
+                                                  style: TextStyle(
+                                                    color: textColor2,
+                                                    fontFamily: 'font6',
+                                                    fontSize: 11,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 10),
+                                              FilledButton.tonal(
+                                                onPressed: () {
+                                                  _openInChrome(materialLU);
+                                                },
+                                                child: Text(
+                                                  "Yes",
+                                                  style: TextStyle(
+                                                    color: textColor2,
+                                                    fontFamily: 'font6',
+                                                    fontSize: 11,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
                               },
-                            ),
-                          );
-                        },
-                        child: Container(
-                          height: 80,
-                          width: (MediaQuery.of(context).size.width - 50) / 2,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: containerColor,
-                          ),
-                          child: Center(
-                            child: Text(
-                              'Nura Apur Note',
-                              style: TextStyle(
-                                color: textColor2,
-                                fontFamily: 'font6',
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(context, MaterialPageRoute(
-                            builder: (context) {
-                              return const QuestionBankPage();
-                            },
-                          ));
-                        },
-                        child: Container(
-                          height: 80,
-                          width: (MediaQuery.of(context).size.width - 50) / 2,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15),
-                            color: containerColor,
-                          ),
-                          child: Center(
-                            child: Text(
-                              'Question Bank',
-                              style: TextStyle(
-                                fontFamily: 'font6',
-                                color: textColor2,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  const Divider(),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Expanded(
-                    child: isAddingData
-                        ? const Center(
-                            child: CircularProgressIndicator(),
-                          )
-                        : courseMaterialBox.isEmpty
-                            ? const Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      "No course material is here.",
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontFamily: 'font6',
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    Text(
-                                      "Try adding some...",
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontFamily: 'font6',
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
+                              child: Container(
+                                height: 80,
+                                width: (MediaQuery.of(context).size.width - 50),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  color: containerColor,
                                 ),
-                              )
-                            : ListView.builder(
-                                padding: const EdgeInsets.all(20),
-                                itemCount: courseMaterialBox.length,
-                                itemBuilder: (context, index) {
-                                  final content =
-                                      courseMaterialBox.getAt(index);
-                                  return Dismissible(
-                                    onDismissed: (direction) {
-                                      deleteNoteAt(context, index);
-                                    },
-                                    key: ValueKey(content.hashCode),
-                                    background: Padding(
-                                      padding: const EdgeInsets.all(15.0),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(20),
-                                        child: Image.asset(
-                                          "assets/a.gif",
-                                          fit: BoxFit.cover,
-                                        ),
+                                child: Center(
+                                  child: ListTile(
+                                    title: Text(
+                                      "Materials of LU",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: textColor2,
+                                        fontFamily: 'font6',
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    child: Column(
-                                      children: [
-                                        GestureDetector(
-                                          onTap: () {
-                                            widget.openFile(content.path);
+                                    subtitle: Text(
+                                      "Previous Year's Question , Notes , Books , Applications etc...",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: textColor2,
+                                        fontFamily: 'font6',
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        const Divider(),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Expanded(
+                          child: isAddingData
+                              ? const Center(
+                                  child: CircularProgressIndicator(),
+                                )
+                              : courseMaterialBox.isEmpty
+                                  ? const Center(
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            "No course material is here.",
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontFamily: 'font6',
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Text(
+                                            "Try adding some...",
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontFamily: 'font6',
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  : ListView.builder(
+                                      padding: const EdgeInsets.all(20),
+                                      itemCount: courseMaterialBox.length,
+                                      itemBuilder: (context, index) {
+                                        final content =
+                                            courseMaterialBox.getAt(index);
+                                        return Dismissible(
+                                          onDismissed: (direction) {
+                                            deleteNoteAt(context, index);
                                           },
-                                          child: Container(
-                                            width: double.infinity,
-                                            padding: const EdgeInsets.all(10),
-                                            decoration: BoxDecoration(
+                                          key: ValueKey(content.hashCode),
+                                          background: Padding(
+                                            padding: const EdgeInsets.all(15.0),
+                                            child: ClipRRect(
                                               borderRadius:
                                                   BorderRadius.circular(20),
-                                              color: containerColor,
-                                            ),
-                                            child: ListTile(
-                                              title: Text(
-                                                content != null &&
-                                                        content.renamedName
-                                                            .isNotEmpty
-                                                    ? "${content.renamedName} ${content.type}"
-                                                    : basename(content!.path),
-                                                style: TextStyle(
-                                                  fontSize: 14,
-                                                  color: textColor2,
-                                                  fontFamily: 'font6',
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                              subtitle: Text(
-                                                "${formattedDate.format(content.date)} , ${content.date.hour}:${content.date.minute}",
-                                                style: TextStyle(
-                                                    fontSize: 10,
-                                                    color: textColor2,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontFamily: 'font6'),
-                                              ),
-                                              leading: Text(
-                                                "${index + 1}",
-                                                style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: textColor2,
-                                                    fontFamily: 'font6'),
-                                              ),
-                                              trailing: IconButton(
-                                                onPressed: () {
-                                                  showRenameDialog(
-                                                      context, index, content);
-                                                },
-                                                icon: const Icon(
-                                                  Icons.create_outlined,
-                                                  size: 15,
-                                                  color: Colors.white,
-                                                ),
-                                                color: textColor,
+                                              child: Image.asset(
+                                                "assets/a.gif",
+                                                fit: BoxFit.cover,
                                               ),
                                             ),
                                           ),
-                                        ),
-                                        const SizedBox(height: 10),
-                                      ],
+                                          child: Column(
+                                            children: [
+                                              GestureDetector(
+                                                onTap: () {
+                                                  widget.openFile(content.path);
+                                                },
+                                                child: Container(
+                                                  width: double.infinity,
+                                                  padding:
+                                                      const EdgeInsets.all(10),
+                                                  decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            20),
+                                                    color: containerColor,
+                                                  ),
+                                                  child: ListTile(
+                                                    title: Text(
+                                                      content != null &&
+                                                              content
+                                                                  .renamedName
+                                                                  .isNotEmpty
+                                                          ? "${content.renamedName} ${content.type}"
+                                                          : basename(
+                                                              content!.path),
+                                                      style: TextStyle(
+                                                        fontSize: 14,
+                                                        color: textColor2,
+                                                        fontFamily: 'font6',
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                    ),
+                                                    subtitle: Text(
+                                                      "${formattedDate.format(content.date)} , ${content.date.hour}:${content.date.minute}",
+                                                      style: TextStyle(
+                                                          fontSize: 10,
+                                                          color: textColor2,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontFamily: 'font6'),
+                                                    ),
+                                                    leading: Text(
+                                                      "${index + 1}",
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: textColor2,
+                                                          fontFamily: 'font6'),
+                                                    ),
+                                                    trailing: IconButton(
+                                                      onPressed: () {
+                                                        showRenameDialog(
+                                                            context,
+                                                            index,
+                                                            content);
+                                                      },
+                                                      icon: const Icon(
+                                                        Icons.create_outlined,
+                                                        size: 15,
+                                                        color: Colors.white,
+                                                      ),
+                                                      color: textColor,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(height: 10),
+                                            ],
+                                          ),
+                                        );
+                                      },
                                     ),
-                                  );
-                                },
-                              ),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
-            ),
-    );
+          );
   }
 }

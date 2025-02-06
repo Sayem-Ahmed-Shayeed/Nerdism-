@@ -16,7 +16,7 @@ class SplashScreen extends StatelessWidget {
       backgroundColor: appBarColor,
       centered: true,
       splashTransition: SplashTransition.fadeTransition,
-      animationDuration: const Duration(seconds: 2),
+      // animationDuration: const Duration(seconds: 1),
       curve: Curves.easeIn,
       splash: const SplashScreenWidget(),
       nextScreen: const FirstPage(),

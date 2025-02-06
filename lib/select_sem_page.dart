@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:lottie/lottie.dart';
 import 'package:nerdism/allCourses.dart';
 import 'package:nerdism/course_model.dart';
 import 'package:nerdism/nerdism.dart';
@@ -19,6 +20,7 @@ class _FirstPageState extends State<FirstPage> {
   late Box<UserInfo> userInfoBox;
   late Box<RetakeCourses> retakeCoursesBox;
   bool isLoading = true;
+  bool isNavigating = false;
 
   @override
   void initState() {
@@ -50,7 +52,21 @@ class _FirstPageState extends State<FirstPage> {
       _formKey.currentState!.save();
       enteredInfo = UserInfo(name: name, batch: batch);
       userInfoBox.put(enteredInfo!.id, enteredInfo!);
-      setState(() {}); // Refresh the widget to reflect new data
+
+      setState(() {
+        isNavigating = true;
+      });
+
+      Future.delayed(const Duration(seconds: 1), () {
+        setState(() {
+          isNavigating = false;
+        });
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const Nerdism()),
+        );
+      });
     }
   }
 
@@ -73,11 +89,19 @@ class _FirstPageState extends State<FirstPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
+    if (isLoading || isNavigating) {
+      Future.delayed(
+        const Duration(seconds: 2),
+      );
       // Show a loading indicator while waiting for the box to initialize
-      return const Scaffold(
+      return Scaffold(
         body: Center(
-          child: CircularProgressIndicator(),
+          child: LottieBuilder.asset(
+            'assets/Lottie/loader.json',
+            height: 10,
+            width: 10,
+            fit: BoxFit.cover,
+          ),
         ),
       );
     }
@@ -89,11 +113,12 @@ class _FirstPageState extends State<FirstPage> {
             appBar: AppBar(
               scrolledUnderElevation: 0,
               centerTitle: true,
-              title: const Text(
-                "N e r d i s m",
+              title: Text(
+                "Nerdism",
                 style: TextStyle(
                   fontFamily: 'font2',
-                  color: Color(0xff5bfa68),
+                  color: textColor,
+                  letterSpacing: 3,
                 ),
               ),
               backgroundColor: appBarColor,
@@ -106,7 +131,7 @@ class _FirstPageState extends State<FirstPage> {
                     key: _formKey,
                     child: Padding(
                       padding: const EdgeInsets.only(
-                        top: 70.0,
+                        top: 20.0,
                         left: 30,
                         right: 30,
                         bottom: 40,
@@ -117,8 +142,9 @@ class _FirstPageState extends State<FirstPage> {
                           TextFormField(
                             style: const TextStyle(
                               fontFamily: 'font6',
-                              fontSize: 14,
+                              fontSize: 16,
                               color: Colors.white,
+                              fontWeight: FontWeight.bold,
                             ),
                             decoration: const InputDecoration(
                               errorStyle: TextStyle(
@@ -133,13 +159,7 @@ class _FirstPageState extends State<FirstPage> {
                               ),
                               labelText: "Name",
                               labelStyle: TextStyle(
-                                fontSize: 14,
-                                fontFamily: 'font4',
-                                color: Colors.white,
-                              ),
-                              hintText: "Enter your name here...",
-                              hintStyle: TextStyle(
-                                fontSize: 12,
+                                fontSize: 15,
                                 fontFamily: 'font4',
                                 color: Colors.white,
                               ),
@@ -168,8 +188,9 @@ class _FirstPageState extends State<FirstPage> {
                                 child: TextFormField(
                                   style: const TextStyle(
                                     fontFamily: 'font6',
-                                    fontSize: 14,
+                                    fontSize: 16,
                                     color: Colors.white,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                   maxLength: 2,
                                   decoration: InputDecoration(
@@ -185,15 +206,16 @@ class _FirstPageState extends State<FirstPage> {
                                     ),
                                     labelText: "Which batch are you in?",
                                     labelStyle: const TextStyle(
-                                      fontSize: 14,
+                                      fontSize: 15,
                                       fontFamily: 'font4',
                                       color: Colors.white,
                                     ),
                                     suffixText: suffixText,
                                     suffixStyle: const TextStyle(
-                                      fontSize: 14,
-                                      fontFamily: 'font4',
-                                    ),
+                                        fontSize: 15,
+                                        color: Colors.white,
+                                        fontFamily: 'font6',
+                                        fontWeight: FontWeight.bold),
                                   ),
                                   validator: (value) {
                                     if (value == null ||
@@ -246,8 +268,8 @@ class _FirstPageState extends State<FirstPage> {
                                     child: const Text(
                                       "Reset",
                                       style: TextStyle(
-                                        fontFamily: 'font4',
-                                        fontSize: 12,
+                                        fontFamily: 'font1',
+                                        fontSize: 14,
                                         color: Colors.white,
                                       ),
                                     ),
@@ -258,9 +280,10 @@ class _FirstPageState extends State<FirstPage> {
                                     child: Text(
                                       "Submit",
                                       style: TextStyle(
-                                        fontFamily: 'font4',
-                                        fontSize: 12,
+                                        fontFamily: 'font1',
+                                        fontSize: 14,
                                         color: textColor,
+                                        //fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                   ),
@@ -269,13 +292,19 @@ class _FirstPageState extends State<FirstPage> {
                             ],
                           ),
                           const SizedBox(height: 20),
-                          Text(
-                            "--- Select Courses for Retake ---",
-                            style: TextStyle(
-                                fontSize: 18,
-                                color: textColor,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'font6'),
+                          Column(
+                            children: [
+                              Text(
+                                "Select Courses for Retake",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: textColor,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'font1',
+                                ),
+                              ),
+                              const Divider(),
+                            ],
                           ),
                           const SizedBox(height: 20),
                           Expanded(
@@ -294,16 +323,20 @@ class _FirstPageState extends State<FirstPage> {
                                   ),
                                   title: Text(
                                     course,
-                                    style: const TextStyle(
-                                      fontFamily: 'font4',
+                                    style: TextStyle(
+                                      fontFamily: 'font1',
+                                      color: textColor2,
                                       fontSize: 17,
+                                      //fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                   subtitle: Text(
                                     code,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontFamily: 'font4',
                                       fontSize: 14,
+                                      color: textColor2,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                   value: selectedCourses[course] ?? false,
