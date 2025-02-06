@@ -609,7 +609,7 @@ class _CourseContentState extends State<CourseContent> {
                                             children: [
                                               GestureDetector(
                                                 onTap: () {
-                                                  widget.openFile(content.path);
+                                                  openFile(content.path);
                                                 },
                                                 child: Container(
                                                   width: double.infinity,
