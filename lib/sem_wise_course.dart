@@ -1,6 +1,6 @@
 import 'course_model.dart';
 
-Map<int, List<CourseDetails>> Courses = {
+var courses = <int, List<CourseDetails>>{
   65: [
     CourseDetails(
         courseTitle: "Introduction to Computing",

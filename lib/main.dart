@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
-import 'package:nerdism/course_content.dart';
 import 'package:nerdism/nerdism.dart';
 import 'package:nerdism/retake_data.dart';
-import 'package:nerdism/select_sem_page.dart';
 import 'package:nerdism/splash_screen.dart';
+import 'package:nerdism/splash_screen_widget.dart';
+
 import 'course_content_adapter.dart';
 import 'data_model.dart';
 

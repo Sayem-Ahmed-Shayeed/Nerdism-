@@ -16,7 +16,7 @@ import 'package:path/path.dart';
 var formattedDate = DateFormat.yMMMMd('en_US');
 
 class CourseContent extends StatefulWidget {
-  CourseContent({
+  const CourseContent({
     super.key,
     required this.courseTitle,
     required this.courseCode,
@@ -185,10 +185,14 @@ class _CourseContentState extends State<CourseContent> {
     }
   }
 
-  Future<void> _openInChrome(Uri url) async {
+  Future<void> _openInChrome(
+    Uri url,
+  ) async {
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       throw 'Could not launch $url';
     }
+
+    if (!mounted) return; // Check if the widget is still mounted
   }
 
   @override
@@ -491,6 +495,7 @@ class _CourseContentState extends State<CourseContent> {
                                               FilledButton.tonal(
                                                 onPressed: () {
                                                   _openInChrome(materialLU);
+                                                  Navigator.pop(context);
                                                 },
                                                 child: Text(
                                                   "Yes",

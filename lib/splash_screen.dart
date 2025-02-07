@@ -1,9 +1,8 @@
 import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
 import 'package:nerdism/select_sem_page.dart';
-import 'package:nerdism/splashScreen.dart';
+import 'package:nerdism/splash_screen_widget.dart';
 import 'package:nerdism/theme&colors/colors.dart';
 
 class SplashScreen extends StatelessWidget {
@@ -12,14 +11,12 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedSplashScreen(
-      splashIconSize: 100,
-      backgroundColor: appBarColor,
+      splashIconSize: 250,
+      backgroundColor: const Color(0xff16282b),
       centered: true,
       splashTransition: SplashTransition.fadeTransition,
-      // animationDuration: const Duration(seconds: 1),
-      curve: Curves.easeIn,
-      splash: const SplashScreenWidget(),
-      nextScreen: const FirstPage(),
+      curve: Curves.easeIn, splash: const SplashScreenWidget(),
+      nextScreen: const FirstPage(), // Ensure you're navigating correctly
     );
   }
 }

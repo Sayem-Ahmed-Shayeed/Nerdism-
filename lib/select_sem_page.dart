@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:lottie/lottie.dart';
-import 'package:nerdism/allCourses.dart';
-import 'package:nerdism/course_model.dart';
+import 'package:nerdism/all_courses.dart';
 import 'package:nerdism/nerdism.dart';
 import 'package:nerdism/retake_data.dart';
 import 'package:nerdism/theme&colors/colors.dart';
@@ -53,14 +52,20 @@ class _FirstPageState extends State<FirstPage> {
       enteredInfo = UserInfo(name: name, batch: batch);
       userInfoBox.put(enteredInfo!.id, enteredInfo!);
 
+      if (!mounted) return; // Check before setState
+
       setState(() {
         isNavigating = true;
       });
 
       Future.delayed(const Duration(seconds: 1), () {
+        if (!mounted) return; // Check before setState again
+
         setState(() {
           isNavigating = false;
         });
+
+        if (!mounted) return; // Check before navigation
 
         Navigator.pushReplacement(
           context,
@@ -91,15 +96,15 @@ class _FirstPageState extends State<FirstPage> {
   Widget build(BuildContext context) {
     if (isLoading || isNavigating) {
       Future.delayed(
-        const Duration(seconds: 2),
+        const Duration(seconds: 1),
       );
       // Show a loading indicator while waiting for the box to initialize
       return Scaffold(
         body: Center(
           child: LottieBuilder.asset(
             'assets/Lottie/loader.json',
-            height: 10,
-            width: 10,
+            height: 20,
+            width: 20,
             fit: BoxFit.cover,
           ),
         ),
@@ -131,7 +136,7 @@ class _FirstPageState extends State<FirstPage> {
                     key: _formKey,
                     child: Padding(
                       padding: const EdgeInsets.only(
-                        top: 20.0,
+                        top: 30.0,
                         left: 30,
                         right: 30,
                         bottom: 40,

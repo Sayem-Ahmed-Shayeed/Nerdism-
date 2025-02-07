@@ -5,7 +5,7 @@ import 'package:nerdism/course_content.dart';
 import 'package:nerdism/retake_data.dart';
 import 'package:nerdism/select_sem_page.dart';
 import 'package:nerdism/theme&colors/colors.dart';
-import 'SemWiseCourse.dart';
+import 'sem_wise_course.dart';
 import 'course_content_adapter.dart';
 import 'data_model.dart'; // Import FirstPage
 
@@ -123,11 +123,11 @@ class _NerdismState extends State<Nerdism> {
       isLoggingOut = true;
     });
 
-    await Future.delayed(
-      const Duration(seconds: 2),
-    ); // Simulating logout delay
+    await Future.delayed(const Duration(seconds: 1)); // Simulating logout delay
 
-    clearAllBoxes();
+    await clearAllBoxes(); // Ensure all data is cleared
+
+    if (!mounted) return; // Check if the widget is still in the tree
 
     setState(() {
       isLoggingOut = false; // Hide loading spinner
@@ -147,58 +147,14 @@ class _NerdismState extends State<Nerdism> {
             child: LottieBuilder.asset(
               'assets/Lottie/loader.json',
               fit: BoxFit.cover,
+              height: 20,
+              width: 20,
             ),
           )
         : (userInfoBox.isEmpty)
             ? const FirstPage()
             : Scaffold(
-                drawer: Drawer(
-                  width: 250,
-                  clipBehavior: Clip.hardEdge,
-                  elevation: 0,
-                  shape: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20)),
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                      top: 50,
-                      left: 10,
-                      right: 10,
-                    ),
-                    child: ListView(
-                      children: [
-                        isLoggingOut
-                            ? Center(
-                                child: LottieBuilder.asset(
-                                  "assets/Lottie/loader.json",
-                                  height: 30,
-                                  width: 30,
-                                ),
-                              )
-                            : TextButton.icon(
-                                style: TextButton.styleFrom(
-                                  iconColor: Colors.red,
-                                  shape: ContinuousRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                ),
-                                onPressed: logout, // Call logout function
-                                icon: const Icon(
-                                  Icons.logout,
-                                  size: 20,
-                                ),
-                                label: Text(
-                                  "Log Out",
-                                  style: TextStyle(
-                                    color: textColor2,
-                                    fontFamily: "font6",
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              )
-                      ],
-                    ),
-                  ),
-                ),
+                drawer: buildDrawer(),
                 backgroundColor: appBarColor,
                 appBar: AppBar(
                   centerTitle: true,
@@ -221,45 +177,38 @@ class _NerdismState extends State<Nerdism> {
                     ? Center(
                         child: LottieBuilder.asset(
                           'assets/Lottie/loader.json',
+                          height: 20,
+                          width: 20,
                           fit: BoxFit.cover,
                         ),
                       )
                     : Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Padding(
-                            padding: const EdgeInsets.only(top: 20, left: 30),
+                            padding: const EdgeInsets.only(
+                              left: 20.0,
+                              top: 20,
+                            ),
                             child: Text(
-                              "$name...",
+                              "Courses for $batch batch...",
+                              textAlign: TextAlign.start,
                               style: TextStyle(
                                 fontSize: 15,
-                                color: textColor2,
-                                fontFamily: 'font7',
+                                color: textColor,
+                                fontFamily: 'font1',
                                 fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 30),
-                            child: Text(
-                              "Batch: $batch",
-                              style: TextStyle(
-                                fontStyle: FontStyle.italic,
-                                fontSize: 10,
-                                color: textColor2,
-                                fontFamily: 'font7',
-                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
                           Expanded(
                             child: ListView.builder(
                               padding: const EdgeInsets.all(20),
-                              itemCount: (Courses[batch]?.length ?? 0) +
+                              itemCount: (courses[batch]?.length ?? 0) +
                                   retakeCoursesBox.length, // Total courses
                               itemBuilder: (context, index) {
-                                if (index < (Courses[batch]?.length ?? 0)) {
-                                  final course = Courses[batch]![index];
+                                if (index < (courses[batch]?.length ?? 0)) {
+                                  final course = courses[batch]![index];
                                   return buildCourseTile(
                                     index + 1,
                                     course.courseTitle,
@@ -282,7 +231,7 @@ class _NerdismState extends State<Nerdism> {
                                   );
                                 } else {
                                   final retakeIndex =
-                                      index - (Courses[batch]?.length ?? 0);
+                                      index - (courses[batch]?.length ?? 0);
                                   final retakeCourse =
                                       retakeCoursesBox.getAt(retakeIndex)!;
                                   return buildCourseTile(
@@ -314,6 +263,60 @@ class _NerdismState extends State<Nerdism> {
                         ],
                       ),
               );
+  }
+
+  Widget buildDrawer() {
+    return Drawer(
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.horizontal(
+          right: Radius.circular(20),
+        ),
+      ),
+      child: Column(
+        children: [
+          UserAccountsDrawerHeader(
+            decoration: BoxDecoration(color: appBarColor),
+            accountName: Text(
+              name,
+              style: TextStyle(
+                fontSize: 18,
+                color: textColor,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'font7',
+              ),
+            ),
+            accountEmail: Text(
+              "Batch: $batch",
+              style: TextStyle(
+                fontSize: 11,
+                color: textColor2,
+                //fontWeight: FontWeight.bold,
+                fontFamily: 'font7',
+              ),
+            ),
+            currentAccountPicture: CircleAvatar(
+              backgroundColor: containerColor,
+              child: Icon(Icons.person, size: 40, color: appBarColor),
+            ),
+          ),
+          ListTile(
+              leading: const Icon(Icons.school),
+              title: const Text("Courses Page"),
+              onTap: () => Navigator.pop(context)),
+          ListTile(
+            leading: const Icon(Icons.exit_to_app, color: Colors.red),
+            title: Text(
+              "Logout",
+              style: TextStyle(
+                  color: textColor2,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'font6'),
+            ),
+            onTap: logout,
+          ),
+        ],
+      ),
+    );
   }
 
   Widget buildCourseTile(

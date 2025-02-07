@@ -78,6 +78,7 @@ flutter:
     - assets/Lottie/loader.json
     - assets/Lottie/splashscreen.gif
     - assets/alertdialogbackground.jpg
+    - assets/abstract-background-featuring-sky-clouds.jpg
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -114,6 +115,10 @@ flutter:
     - family: font7
       fonts:
         - asset: assets/fonts/Ojuju-VariableFont_wght.ttf
+    - family: font8
+      fonts:
+        - asset: assets/fonts/bolobolu-Regular.ttf
+
 
   #
   # For details regarding fonts from package dependencies,
