@@ -72,13 +72,9 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/dismissable_background.jpg
     - assets/a.gif
-    - assets/Lottie/splashscreen.json
     - assets/Lottie/loader.json
-    - assets/Lottie/splashscreen.gif
     - assets/alertdialogbackground.jpg
-    - assets/abstract-background-featuring-sky-clouds.jpg
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -101,9 +97,6 @@ flutter:
       fonts:
         - asset: assets/fonts/Boogaloo-Regular.ttf
 
-    - family: font3
-      fonts:
-        - asset: assets/fonts/Devonshire-Regular.ttf
     - family: font4
       fonts:
         - asset: assets/fonts/SmoochSans-VariableFont_wght.ttf

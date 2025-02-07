@@ -15,8 +15,7 @@ class SplashScreenWidget extends StatelessWidget {
             borderRadius: BorderRadius.circular(30),
             color: containerColor,
             image: DecorationImage(
-              image: const AssetImage(
-                  'assets/abstract-background-featuring-sky-clouds.jpg'),
+              image: const AssetImage('assets/a.gif'),
               fit: BoxFit.cover,
               opacity: 0.6,
               colorFilter: ColorFilter.mode(containerColor, BlendMode.dst),

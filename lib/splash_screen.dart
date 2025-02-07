@@ -3,7 +3,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nerdism/select_sem_page.dart';
 import 'package:nerdism/splash_screen_widget.dart';
-import 'package:nerdism/theme&colors/colors.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});

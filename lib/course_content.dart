@@ -448,7 +448,7 @@ class _CourseContentState extends State<CourseContent> {
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Text(
-                                            "This will lead to an external browser...",
+                                            "This will open an external app...",
                                             style: TextStyle(
                                               color: textColor2,
                                               fontFamily: 'font6',
